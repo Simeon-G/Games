@@ -72,13 +72,20 @@ namespace Spiele
             int koordinate = 0;
             bool Koord = false;
 
-            Console.WriteLine("Gib bitte die Reihe an.");
-            Koord = Int32.TryParse(Console.ReadLine(), out koordinate);
-
-            if (Koord == false || koordinate < 0 || koordinate > _boardlaenge - 1)
+            if(_playerName[_player] == "KI")
             {
-                _fehlermeldung = "Es muss eine Zahl zwischen 0 und " + (_boardlaenge - 1) + " eingegeben werden. \n";
+                    Random zufallsZahl = new Random();
+                    koordinate = zufallsZahl.Next(0, _boardlaenge);
+            }
+            else
+            {
+                Console.WriteLine("Gib bitte die Reihe an.");
+                Koord = Int32.TryParse(Console.ReadLine(), out koordinate);
 
+                if (Koord == false || koordinate < 0 || koordinate > _boardlaenge - 1)
+                {
+                    _fehlermeldung = "Es muss eine Zahl zwischen 0 und " + (_boardlaenge - 1) + " eingegeben werden. \n";
+                }
             }
 
             return koordinate;

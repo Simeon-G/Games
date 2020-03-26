@@ -47,8 +47,8 @@ namespace Spiele
                 while (richtigeEingabe == false)
                 {
                     Random zufallsZahl = new Random();
-                    yKoordinate = zufallsZahl.Next(0, 3);
-                    xKoordinate = zufallsZahl.Next(0, 3);
+                    yKoordinate = zufallsZahl.Next(0, _boardhoehe);
+                    xKoordinate = zufallsZahl.Next(0, _boardlaenge);
 
                     if (_board[yKoordinate, xKoordinate] == " ")
                     {

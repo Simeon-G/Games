@@ -26,6 +26,7 @@ namespace Spiele
             {
                 _zahlen[i] = i;
             }
+            Console.WriteLine("Gib KI als Namen ein, um dem Computer spielen zu lassen.");
             AbfrageSpielernamen();
             Spielwahl();
         }
