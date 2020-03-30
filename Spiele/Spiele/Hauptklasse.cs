@@ -19,7 +19,8 @@ namespace Spiele
             Spieler Spieler1 = new Spieler(Spielfeld.AbfrageSpielernamen(spieler1), spieler1);
             Spieler Spieler2 = new Spieler(Spielfeld.AbfrageSpielernamen(spieler2), spieler2);
             IGame aktuellesSpiel = Spielfeld.Spielwahl();
-            aktuellesSpiel.Hauptprogramm(aktuellesSpiel);
+            //Warum gibst du denn deinem Spiel sich selbst mit?
+            aktuellesSpiel.Hauptprogramm(aktuellesSpiel); 
         }
     }
 }
