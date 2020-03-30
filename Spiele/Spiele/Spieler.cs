@@ -9,36 +9,36 @@ namespace Spiele
     public enum SpielerNummer
     {
         spieler1 = 1,
-        spieler2
+        spieler2 = 2
     }
-    class Spieler
+    public class Spieler
     {
-        public string _spielerName { get; set; }
-        public int _spielerZahl { get; set; }
-        public string _spielerZeichen { get; set; }
-        public bool _künstlicheIntelligenz { get; set; }
+        public string SpielerName { get; set; }
+        public int SpielerZahl { get; set; }
+        public string SpielerZeichen { get; set; }
+        public bool KünstlicheIntelligenz { get; set; }
 
 
         public Spieler(string spielerName, SpielerNummer Zahl)
         {
-            _spielerName = spielerName;
+            SpielerName = spielerName;
             bool rdy = Int32.TryParse(Zahl.ToString(), out int spielerZahl);
-            _spielerZahl = spielerZahl;
+            SpielerZahl = spielerZahl;
             if(spielerZahl == 1)
             {
-                _spielerZeichen = "X";
+                SpielerZeichen = "X";
             }
             else
             {
-                _spielerZeichen = "O";
+                SpielerZeichen = "O";
             }
             if(spielerName == "KI")
             {
-                _künstlicheIntelligenz = true;
+                KünstlicheIntelligenz = true;
             }
             else
             {
-                _künstlicheIntelligenz = false;
+                KünstlicheIntelligenz = false;
             }
         }
     }

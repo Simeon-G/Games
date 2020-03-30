@@ -10,105 +10,119 @@ namespace Spiele
 {
     class TicTacToe : IGame
     {
-        public string _spielName { get; set; }
-        public string[,] _board { get; set; }
-        public bool _yKoord = false;
-        public bool _xKoord = false;
-        public TicTacToe(string spielName, string[,] board)
+        public string SpielName { get; set; }
+        public string[,] Board { get; set; }
+        public Spielfeld Feld { get; set; }
+        public Spieler Spieler1 { get; set; }
+        public Spieler Spieler2 { get; set; }
+
+        private Spieler _derzeitigerSpieler;
+        private int _derzeitigerSpielerZahl = 1;
+        private string _fehlermeldung;
+        private int _anzahlSpielzüge = 0;
+        public TicTacToe(string spielName, string[,] board, Spielfeld feld, Spieler spieler1, Spieler spieler2)
         {
-            _spielName = spielName;
-            _board = board;
+            SpielName = spielName;
+            Board = board;
+            Feld = feld;
+            Spieler1 = spieler1;
+            Spieler2 = spieler2;
         }
         public void Hauptprogramm(IGame ticTacToe)
         {
             bool gewonnen = false;
             bool gleichstand = false;
-            Console.Clear();
-            Spielfeld.Render(_board);
-            Console.Write(_fehlermeldung);
-            _fehlermeldung = "";
-            Make_move(Get_move());
-            bool gewonnen = Gewonnen(_boardlaenge);
-            if (gewonnen || gleichstand)
+
+            if (_derzeitigerSpielerZahl == Spieler1.SpielerZahl)
             {
-                Ende(gewonnen);
-            }
-            if (_player == 1)
-            {
-                _player = 2;
+                _derzeitigerSpieler = Spieler1;
+                _derzeitigerSpielerZahl = 2;
             }
             else
             {
-                _player = 1;
+                _derzeitigerSpieler = Spieler2;
+                _derzeitigerSpielerZahl = 1;
             }
             Console.Clear();
-            Hauptprogramm();
+            Console.WriteLine("*" + ticTacToe.SpielName + "*");
+            Spielfeld.Render(Board, Feld);
+            Console.Write(_fehlermeldung);
+            _fehlermeldung = "";
+            Make_Move(Get_Move());
+
+            if (_fehlermeldung != "")
+            {
+                gewonnen = Spielfeld.Gewonnen(3, Board, Feld, _anzahlSpielzüge, _derzeitigerSpieler);
+                gleichstand = Spielfeld.Gleichstand(Feld, Board);
+                if (gewonnen || gleichstand)
+                {
+                    Spielfeld.Ende(gewonnen, Board, Feld, ticTacToe, _derzeitigerSpieler);
+                    Board = new string[Feld.Boardhoehe,Feld.Boardlaenge];
+                    gewonnen = false;
+                    _derzeitigerSpielerZahl = 1;
+                    _derzeitigerSpieler = null;
+                    _anzahlSpielzüge = 0;
+                    _fehlermeldung = "";
+                }
+            }
+            Console.Clear();
+            Hauptprogramm(ticTacToe);
         }
-        int[] IGame.Get_Move()
+        public void Make_Move(int[] koordinaten)
+        {
+            if(_fehlermeldung == "")
+            {
+                if (Board[koordinaten[0], koordinaten[1]] == " ")
+                {
+                    _anzahlSpielzüge++;
+                    Board[koordinaten[0], koordinaten[1]] = _derzeitigerSpieler.SpielerZeichen;
+                }
+                else
+                {
+                    Console.Clear();
+                    _fehlermeldung = "In dem Feld (" + koordinaten[0] + "," + koordinaten[1] + ") steht schon etwas drin.";
+                }
+            }
+        }
+        public int[] Get_Move()
         {
             int[] koordinaten = new int[2];
             int yKoordinate = 0;
             int xKoordinate = 0;
+            bool yKoord = false;
+            bool xKoord = false;
 
-            if (_playerName[_player] == "KI")
+            if (_derzeitigerSpieler.KünstlicheIntelligenz)
             {
                     Random zufallsZahl = new Random();
-                    yKoordinate = zufallsZahl.Next(-1, _boardhoehe);
-                    xKoordinate = zufallsZahl.Next(-1, _boardlaenge);
+                    yKoordinate = zufallsZahl.Next(-1, Feld.Boardhoehe);
+                    xKoordinate = zufallsZahl.Next(-1, Feld.Boardlaenge);
             }
             else
             {
-                if (_yKoord == false)
+                if (yKoord == false)
                 {
                     Console.WriteLine("Gib bitte die vertikale Achse an.");
-                    _yKoord = Int32.TryParse(Console.ReadLine(), out yKoordinate);
+                    yKoord = Int32.TryParse(Console.ReadLine(), out yKoordinate);
                 }
 
-                if (_yKoord == false || yKoordinate < 0 || yKoordinate > _boardlaenge - 1)
+                if (yKoord == false || yKoordinate < 0 || yKoordinate > Feld.Boardlaenge - 1)
                 {
-                    _fehlermeldung = "Es muss eine Zahl zwischen 0 und " + (_boardlaenge - 1) + " eingegeben werden. \n";
-                    Hauptprogramm();
+                    _fehlermeldung = "Es wurde fehlerhafte Werte eingegeben. Erlaubt sind Zahlen zwischen 0 und " + ( Feld.Boardlaenge - 1) + ". \n";
                 }
-                _yKoord = true;
+                yKoord = true;
 
                 Console.WriteLine("Gib bitte die horizontale Achse an.");
-                _xKoord = Int32.TryParse(Console.ReadLine(), out xKoordinate);
+                xKoord = Int32.TryParse(Console.ReadLine(), out xKoordinate);
 
-                if (_xKoord == false || xKoordinate < 0 || xKoordinate > _boardlaenge - 1)
+                if (xKoord == false || xKoordinate < 0 || xKoordinate > Feld.Boardlaenge - 1)
                 {
-                    _fehlermeldung = "Es muss eine Zahl zwischen 0 und " + (_boardlaenge - 1) + " eingegeben werden. \n";
-                    Hauptprogramm();
+                    _fehlermeldung = "Es muss eine Zahl zwischen 0 und " + (Feld.Boardlaenge - 1) + " eingegeben werden. \n";
                 }
             }
-
-            _yKoord = false;
-            _xKoord = false;
             koordinaten[0] = yKoordinate;
             koordinaten[1] = xKoordinate;
             return koordinaten;
-        }
-        void IGame.Make_Move(int[] koordinaten)
-        {
-            if (_board[koordinaten[0], koordinaten[1]] == " ")
-            {
-                _anzahlSpielzuege++;
-                if (_player == 1)
-                {
-                    _board[koordinaten[0], koordinaten[1]] = "X";
-                    return;
-                }
-                else
-                {
-                    _board[koordinaten[0], koordinaten[1]] = "O";
-                    return;
-                }
-            }
-            else
-            {
-                Console.Clear();
-                _fehlermeldung = "In dem Feld (" + koordinaten[0] + "," + koordinaten[1] + ") steht schon etwas drin.";
-                Hauptprogramm();
-            }
         }
     }
 }

@@ -8,97 +8,113 @@ namespace Spiele
 {
     class VierGewinnt : IGame
     {
-        public string _spielName { get; set; }
-        public string[,] _board { get; set; }
-        public VierGewinnt(string spielName, string[,] board)
+        public string SpielName { get; set; }
+        public string[,] Board { get; set; }
+        public Spielfeld Feld { get; set; }
+        public Spieler Spieler1 { get; set; }
+        public Spieler Spieler2 { get; set; }
+
+        private Spieler _derzeitigerSpieler;
+        private int _derzeitigerSpielerZahl = 1;
+        private string _fehlermeldung;
+        private int _anzahlSpielzüge = 0;
+        public VierGewinnt(string spielName, string[,] board, Spielfeld feld, Spieler spieler1, Spieler spieler2)
         {
-            _spielName = spielName;
-            _board = board;
+            SpielName = spielName;
+            Board = board;
+            Feld = feld;
+            Spieler1 = spieler1;
+            Spieler2 = spieler2;
         }
         public void Hauptprogramm(IGame vierGewinnt)
         {
             bool gewonnen = false;
             bool gleichstand = false;
 
-            Console.Clear();
-            Spielfeld.Render(_board);
-            Console.Write(_fehlermeldung + "\n");
-            _fehlermeldung = "";
-            Make_move(Get_move());
-            gewonnen = VierGewinnt.Gewonnen(4);
-            if (gewonnen || gleichstand)
+            if (_derzeitigerSpielerZahl == Spieler1.SpielerZahl)
             {
-                Ende();
-            }
-            if (_player == 1)
-            {
-                _player = 2;
+                _derzeitigerSpieler = Spieler1;
+                _derzeitigerSpielerZahl = 2;
             }
             else
             {
-                _player = 1;
+                _derzeitigerSpieler = Spieler2;
+                _derzeitigerSpielerZahl = 1;
             }
             Console.Clear();
-            Hauptprogramm();
+            Console.WriteLine("*" + vierGewinnt.SpielName + "*");
+            Spielfeld.Render(Board, Feld);
+            Console.Write(_fehlermeldung + "\n");
+            _fehlermeldung = "";
+            Make_Move(Get_Move());
+            if(_fehlermeldung == "")
+            {
+                gewonnen = Spielfeld.Gewonnen(4, Board, Feld, _anzahlSpielzüge, _derzeitigerSpieler);
+                gleichstand = Spielfeld.Gleichstand(Feld, Board);
+                if (gewonnen || gleichstand)
+                {
+                    Spielfeld.Ende(gewonnen, Board, Feld, vierGewinnt, _derzeitigerSpieler);
+                    Board = new string[Feld.Boardhoehe, Feld.Boardlaenge];
+                    gewonnen = false;
+                    _derzeitigerSpielerZahl = 1;
+                    _derzeitigerSpieler = null;
+                    _anzahlSpielzüge = 0;
+                    _fehlermeldung = "";
+                }
+            }
+            Console.Clear();
+            Hauptprogramm(vierGewinnt);
         }
 
-        void IGame.Make_Move(int[] koordinate)
+        public void Make_Move(int[] koordinate)
         {
-            bool ok = false;
-            for (int i = _boardhoehe-1; i >= 0; i--)
+            if (_fehlermeldung == "")
             {
-                if(_board[i, koordinate] == " ")
+                bool ok = false;
+                for (int i = Feld.Boardhoehe - 1; i >= 0; i--)
                 {
-                    _anzahlSpielzuege++;
-                    if(_player == 1)
+                    if (Board[i, koordinate[0]] == " ")
                     {
-                        _board[i, koordinate] = "X";
-                        ok = true;
-                        i = 0;
-                    }
-                    else
-                    {
-                        _board[i, koordinate] = "O";
+                        _anzahlSpielzüge++;
+
+                        Board[i, koordinate[0]] = _derzeitigerSpieler.SpielerZeichen;
                         ok = true;
                         i = 0;
                     }
                 }
-            }
-            if (ok)
-            {
-                return;
-            }
-            else
-            {
-                Console.Clear();
-                _fehlermeldung = "In dieser Reihe ist kein Platz mehr.";
-                Hauptprogramm();
+                if (ok)
+                {
+                    return;
+                }
+                else
+                {
+                    Console.Clear();
+                    _fehlermeldung = "In dieser Reihe ist kein Platz mehr.";
+                }
             }
         }
 
-       int[] IGame.Get_Move()
+        public int[] Get_Move()
         {
-            int[] koordinaten = new int[1];
-            int koordinate = 0;
+            int[] koordinate = new int[1];
             bool Koord = false;
 
-            if(_player == "KI")
+            if(_derzeitigerSpieler.KünstlicheIntelligenz)
             {
                     Random zufallsZahl = new Random();
-                    koordinate = zufallsZahl.Next(-1, _boardlaenge);
+                    koordinate[0] = zufallsZahl.Next(-1, Feld.Boardlaenge);
             }
             else
             {
                 Console.WriteLine("Gib bitte die Reihe an.");
-                Koord = Int32.TryParse(Console.ReadLine(), out koordinate);
+                Koord = Int32.TryParse(Console.ReadLine(), out koordinate[0]);
 
-                if (Koord == false || koordinate < 0 || koordinate > _boardlaenge - 1)
+                if (Koord == false || koordinate[0] < 0 || koordinate[0] > Feld.Boardlaenge - 1)
                 {
-                    _fehlermeldung = "Es muss eine Zahl zwischen 0 und " + (_boardlaenge - 1) + " eingegeben werden. \n";
+                    _fehlermeldung = "Es muss eine Zahl zwischen 0 und " + (Feld.Boardlaenge - 1) + " eingegeben werden. \n";
                 }
             }
-            koordinaten[0] = koordinate; 
-            return koordinaten;
+            return koordinate;
         }
     }
 }
