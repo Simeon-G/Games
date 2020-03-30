@@ -6,18 +6,27 @@ using System.Threading.Tasks;
 
 namespace Spiele
 {
-    class vierGewinnt : Hauptklasse
+    class VierGewinnt : IGame
     {
-        private static string _fehlermeldung = " ";
-        public static void Hauptprogramm()
+        public string _spielName { get; set; }
+        public string[,] _board { get; set; }
+        public VierGewinnt(string spielName, string[,] board)
         {
+            _spielName = spielName;
+            _board = board;
+        }
+        public void Hauptprogramm(IGame vierGewinnt)
+        {
+            bool gewonnen = false;
+            bool gleichstand = false;
+
             Console.Clear();
-            Render(_board);
+            Spielfeld.Render(_board);
             Console.Write(_fehlermeldung + "\n");
             _fehlermeldung = "";
             Make_move(Get_move());
-            _gewonnen = Gewonnen(4);
-            if (_gewonnen || _gleichstand)
+            gewonnen = VierGewinnt.Gewonnen(4);
+            if (gewonnen || gleichstand)
             {
                 Ende();
             }
@@ -33,7 +42,7 @@ namespace Spiele
             Hauptprogramm();
         }
 
-        private static void Make_move(int koordinate)
+        void IGame.Make_Move(int[] koordinate)
         {
             bool ok = false;
             for (int i = _boardhoehe-1; i >= 0; i--)
@@ -67,15 +76,16 @@ namespace Spiele
             }
         }
 
-        private static int Get_move()
+       int[] IGame.Get_Move()
         {
+            int[] koordinaten = new int[1];
             int koordinate = 0;
             bool Koord = false;
 
-            if(_playerName[_player] == "KI")
+            if(_player == "KI")
             {
                     Random zufallsZahl = new Random();
-                    koordinate = zufallsZahl.Next(0, _boardlaenge);
+                    koordinate = zufallsZahl.Next(-1, _boardlaenge);
             }
             else
             {
@@ -87,8 +97,8 @@ namespace Spiele
                     _fehlermeldung = "Es muss eine Zahl zwischen 0 und " + (_boardlaenge - 1) + " eingegeben werden. \n";
                 }
             }
-
-            return koordinate;
+            koordinaten[0] = koordinate; 
+            return koordinaten;
         }
     }
 }

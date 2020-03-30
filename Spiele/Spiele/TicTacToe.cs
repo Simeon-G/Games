@@ -3,26 +3,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Spiele
 {
-    class TicTacToe : Hauptklasse
+    class TicTacToe : IGame
     {
-        private static string _fehlermeldung = " ";
-        private static bool _yKoord = false;
-        private static bool _xKoord = false;
-        public static void Hauptprogramm()
+        public string _spielName { get; set; }
+        public string[,] _board { get; set; }
+        public bool _yKoord = false;
+        public bool _xKoord = false;
+        public TicTacToe(string spielName, string[,] board)
         {
+            _spielName = spielName;
+            _board = board;
+        }
+        public void Hauptprogramm(IGame ticTacToe)
+        {
+            bool gewonnen = false;
+            bool gleichstand = false;
             Console.Clear();
-            Render(_board);
+            Spielfeld.Render(_board);
             Console.Write(_fehlermeldung);
             _fehlermeldung = "";
             Make_move(Get_move());
-            _gewonnen = Gewonnen(_boardlaenge);
-            if (_gewonnen || _gleichstand)
+            bool gewonnen = Gewonnen(_boardlaenge);
+            if (gewonnen || gleichstand)
             {
-                Ende();
+                Ende(gewonnen);
             }
             if (_player == 1)
             {
@@ -35,26 +44,17 @@ namespace Spiele
             Console.Clear();
             Hauptprogramm();
         }
-        private static int[] Get_move()
+        int[] IGame.Get_Move()
         {
             int[] koordinaten = new int[2];
             int yKoordinate = 0;
             int xKoordinate = 0;
-            bool richtigeEingabe = false;
 
             if (_playerName[_player] == "KI")
             {
-                while (richtigeEingabe == false)
-                {
                     Random zufallsZahl = new Random();
-                    yKoordinate = zufallsZahl.Next(0, _boardhoehe);
-                    xKoordinate = zufallsZahl.Next(0, _boardlaenge);
-
-                    if (_board[yKoordinate, xKoordinate] == " ")
-                    {
-                        richtigeEingabe = true;
-                    }
-                }
+                    yKoordinate = zufallsZahl.Next(-1, _boardhoehe);
+                    xKoordinate = zufallsZahl.Next(-1, _boardlaenge);
             }
             else
             {
@@ -87,7 +87,7 @@ namespace Spiele
             koordinaten[1] = xKoordinate;
             return koordinaten;
         }
-        private static void Make_move(int[] koordinaten)
+        void IGame.Make_Move(int[] koordinaten)
         {
             if (_board[koordinaten[0], koordinaten[1]] == " ")
             {
