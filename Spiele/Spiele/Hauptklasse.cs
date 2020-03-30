@@ -8,6 +8,8 @@ namespace Spiele
 {
     class Hauptklasse
     {
+        //Mein Eindruck auf die Schnelle war, dass du deine Spieler Objekte noch gar nicht wirklich nutzt.
+        //Du könntest sie z.B. den Spielen mitgeben, dann kann im Spiel direkt auf die Spielfigur oder der Name zugegriffen werden (z.B. "Glückwunsch Simeon, du hast gewonnen")
         public static void Main()
         {
             SpielerNummer spieler1 = SpielerNummer.spieler1;
