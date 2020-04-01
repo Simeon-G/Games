@@ -18,7 +18,7 @@ namespace Spiele
         public string SpielerZeichen { get; set; }
         public bool KünstlicheIntelligenz { get; set; }
 
-
+        //Man könnte hier überlegen die Programmlogik aus dem Konstruktor in eine eigene Methode zu verlegen
         public Spieler(string spielerName, SpielerNummer Zahl)
         {
             SpielerName = spielerName;
