@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -55,14 +56,11 @@ namespace Spiele
                 for (int x = 0; x < feld.Boardlaenge; x++)
                 {
                     //Felder, die zum Sieg beigetragen haben erst später wieder einbauen
-                    //if (board[i, x] == _felderGewonnen[i, x])
-                    //{
-                    //    Console.ForegroundColor = ConsoleColor.Red;
-                    //}
-                    //else
-                    //{
-                    //    Console.ForegroundColor = ConsoleColor.White;
-                    //}
+                    if (board[i, x] == _felderGewonnen[i, x])
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                    }
+                    Console.ForegroundColor = ConsoleColor.White;
                     Console.Write(board[i, x] + " ");
                 }
                 Console.Write("|\n");
@@ -76,19 +74,100 @@ namespace Spiele
         }
         public static bool Gewonnen(int siegesBedingung, string[,] board, Spielfeld feld, int anzahlSpielzüge, Spieler derzeitigerSpieler)
         {
-            string[,] boardKopie = board;
             int diagonale = 0;
             int counter = 0;
-
+            bool gewonnen = false;
+            bool outOfRange = false;
+             
             if (anzahlSpielzüge >= siegesBedingung * 2 - 1)
             {
                 for (int i = 0; i < feld.Boardhoehe; i++)
                 {
                     for (int x = 0; x < feld.Boardlaenge; x++)
                     {
-                        if (board[i, x] == derzeitigerSpieler.SpielerZeichen)
+                        gewonnen = überprüfung1(i, x);
+                    }
+                        ClearBoard(feld);
+                        counter = 0;
+                }
+                if (gewonnen) { return true; }
+                for (int i = 0; i < feld.Boardlaenge; i++)
+                {
+                    for (int x = 0; x < feld.Boardhoehe; x++)
+                    {
+                        überprüfung1(x, i);
+                    }
+                    ClearBoard(feld);
+                    counter = 0;
+                }
+                if (gewonnen) { return true; }
+                for (int i = feld.Boardlaenge - 1; i >= 0; i--)
+                {
+                    for (int x = 0; x < feld.Boardhoehe; x++)
+                    {
+                        überprüfung2(i + x, x);
+                        if (outOfRange) { x = feld.Boardhoehe; }
+                    }
+                    ClearBoard(feld);
+                    counter = 0;
+                }
+                if (gewonnen) { return true; }
+                for (int i = feld.Boardlaenge - 1; i >= 0; i--)
+                {
+                    for (int x = 0; x < feld.Boardhoehe; x++)
+                    {
+                        überprüfung2(x, i + x);
+                        if (outOfRange) { x = feld.Boardhoehe; }
+                    }
+                }
+                if (gewonnen) { return true; }
+                for (int i = feld.Boardhoehe - 1; i >= 0; i--)
+                {
+                    diagonale = 0;
+                    for (int x = feld.Boardlaenge - 1; x >= 0; x--)
+                    {
+                        überprüfung3(i + diagonale, x);
+                        if (outOfRange) { x = 0; }
+                    }
+
+                }
+                if (gewonnen) { return true; }
+                for (int i = feld.Boardlaenge - 1; i >= 0; i--)
+                {
+                    diagonale = 0;
+                    for (int x = feld.Boardhoehe - 1; x >= 0; x--)
+                    {
+                        überprüfung3(x, i + diagonale);
+                        if (outOfRange) { x = 0; }
+                    }
+
+                }
+                if (gewonnen) { return true; }
+                bool überprüfung1(int x, int i)
+                {
+                    if (board[x, i] == derzeitigerSpieler.SpielerZeichen)
+                    {
+                        _felderGewonnen[x, i] = board[x, i];
+                        counter++;
+                        if (counter == siegesBedingung)
                         {
-                            _felderGewonnen[i, x] = board[i, x];
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        counter = 0;
+                        ClearBoard(feld);
+                    }
+                    return false;
+                }
+                bool überprüfung2(int x, int i)
+                {
+                    try
+                    {
+                        if (board[x, i + x] == derzeitigerSpieler.SpielerZeichen)
+                        {
+                            _felderGewonnen[x, i + x] = board[x, i + x];
                             counter++;
                             if (counter == siegesBedingung)
                             {
@@ -98,16 +177,20 @@ namespace Spiele
                         else
                         {
                             counter = 0;
-                            ClearBoard(_felderGewonnen, feld);
+                            ClearBoard(feld);
                         }
                     }
-                    ClearBoard(_felderGewonnen, feld);
-                    counter = 0;
+                    catch (IndexOutOfRangeException)
+                    {
+                        counter = 0;
+                        outOfRange = true;
+                        ClearBoard(feld);
+                    }
+                    return false;
                 }
-
-                for (int i = 0; i < feld.Boardlaenge; i++)
+                bool überprüfung3(int x, int i)
                 {
-                    for (int x = 0; x < feld.Boardhoehe; x++)
+                    try
                     {
                         if (board[x, i] == derzeitigerSpieler.SpielerZeichen)
                         {
@@ -121,146 +204,21 @@ namespace Spiele
                         else
                         {
                             counter = 0;
-                            ClearBoard(_felderGewonnen, feld);
+                            ClearBoard(feld);
                         }
+                        diagonale++;
                     }
-                    ClearBoard(_felderGewonnen, feld);
-                    counter = 0;
-                }
-
-                for (int i = feld.Boardlaenge - 1; i >= 0; i--)
-                {
-                    for (int x = 0; x < feld.Boardhoehe; x++)
+                    catch (IndexOutOfRangeException)
                     {
-                        try
-                        {
-                            if (board[i + x, x] == derzeitigerSpieler.SpielerZeichen)
-                            {
-                                _felderGewonnen[i + x, x] = board[i + x, x];
-                                counter++;
-                                if (counter == siegesBedingung)
-                                {
-                                    return true;
-                                }
-                            }
-                            else
-                            {
-                                counter = 0;
-                                ClearBoard(_felderGewonnen, feld);
-                            }
-                        }
-                        catch (IndexOutOfRangeException)
-                        {
-                            counter = 0;
-                            x = feld.Boardhoehe;
-                            ClearBoard(_felderGewonnen, feld);
-                        }
+                        counter = 0;
+                        diagonale = 0;
+                        outOfRange = true;
+                        ClearBoard(feld);
                     }
-                    counter = 0;
-                    ClearBoard(_felderGewonnen, feld);
-                }
-
-                for (int i = feld.Boardlaenge - 1; i >= 0; i--)
-                {
-                    for (int x = 0; x < feld.Boardhoehe; x++)
-                    {
-                        try
-                        {
-                            if (board[x, i + x] == derzeitigerSpieler.SpielerZeichen)
-                            {
-                                _felderGewonnen[x, i + x] = board[x, i + x];
-                                counter++;
-                                if (counter == siegesBedingung)
-                                {
-                                    return true;
-                                }
-                            }
-                            else
-                            {
-                                counter = 0;
-                                ClearBoard(_felderGewonnen, feld);
-                            }
-                        }
-                        catch (IndexOutOfRangeException)
-                        {
-                            counter = 0;
-                            x = feld.Boardhoehe;
-                            ClearBoard(_felderGewonnen, feld);
-                        }
-                    }
-                    counter = 0;
-                    ClearBoard(_felderGewonnen, feld);
-                }
-
-                for (int i = feld.Boardhoehe - 1; i >= 0; i--)
-                {
-                    diagonale = 0;
-                    for (int x = feld.Boardlaenge - 1; x >= 0; x--)
-                    {
-                        try
-                        {
-                            if (board[i + diagonale, x] == derzeitigerSpieler.SpielerZeichen)
-                            {
-                                _felderGewonnen[i + diagonale, x] = board[i + diagonale, x];
-                                counter++;
-                                if (counter == siegesBedingung)
-                                {
-                                    return true;
-                                }
-                            }
-                            else
-                            {
-                                counter = 0;
-                                ClearBoard(_felderGewonnen, feld);
-                            }
-                            diagonale++;
-                        }
-                        catch (IndexOutOfRangeException)
-                        {
-                            counter = 0;
-                            diagonale = 0;
-                            x = 0;
-                            ClearBoard(_felderGewonnen, feld);
-                        }
-                    }
-
-                }
-
-                for (int i = feld.Boardlaenge - 1; i >= 0; i--)
-                {
-                    diagonale = 0;
-                    for (int x = feld.Boardhoehe - 1; x >= 0; x--)
-                    {
-                        try
-                        {
-                            if (board[x, i + diagonale] == derzeitigerSpieler.SpielerZeichen)
-                            {
-                                _felderGewonnen[x, i + diagonale] = board[x, i + diagonale];
-                                counter++;
-                                if (counter == siegesBedingung)
-                                {
-                                    return true;
-                                }
-                            }
-                            else
-                            {
-                                counter = 0;
-                                ClearBoard(_felderGewonnen, feld);
-                            }
-                            diagonale++;
-                        }
-                        catch (IndexOutOfRangeException)
-                        {
-                            counter = 0;
-                            diagonale = 0;
-                            x = 0;
-                            ClearBoard(_felderGewonnen, feld);
-                        }
-                    }
-
+                    return false;
                 }
             }
-            ClearBoard(_felderGewonnen, feld);
+            ClearBoard(feld);
             return false;
         }
 
@@ -331,11 +289,15 @@ namespace Spiele
             name = Console.ReadLine();
             return name;
         }
+        //return Befehl springt nicht aus der ganzen Methode und wiederholt noch einmal die while-schleife
         public static IGame Spielwahl(Spieler spieler1, Spieler spieler2)
         {
             int spielAuswahl;
             string[,] board = null;
-            while (true)
+            bool überprüfung = true;
+            IGame ausgabe = null;
+
+            while (überprüfung)
             {
                 Console.WriteLine("Möchstest du (1) TicTacToe oder (2) 4 Gewinnt spielen?");
                 bool ok = Int32.TryParse(Console.ReadLine(), out spielAuswahl);
@@ -345,36 +307,43 @@ namespace Spiele
                     {
                         Spielfeld feld = new Spielfeld(3, 3, GameKonstanten.tictactoe);
                         board = new string[feld.Boardhoehe, feld.Boardlaenge];
+                        _felderGewonnen = board;
                         TicTacToe ticTacToe = new TicTacToe(GameKonstanten.tictactoe, board, feld, spieler1, spieler2);
                         Console.Clear();
-                        return ticTacToe;
-                        
+                        ausgabe = ticTacToe;
+                        überprüfung = false;
                     }
                     else
                     {
                         Spielfeld feld = new Spielfeld(7, 6, GameKonstanten.viergewinnt);
                         board = new string[feld.Boardhoehe, feld.Boardlaenge];
+                        _felderGewonnen = board;
                         VierGewinnt vierGewinnt = new VierGewinnt(GameKonstanten.viergewinnt, board, feld, spieler1, spieler2);
                         Console.Clear();
-                        return vierGewinnt;
-                        
+                        ausgabe = vierGewinnt;
+                        überprüfung = false;
                     }
                 }
                 else
                 {
                     Console.Clear();
                     Console.WriteLine("Es wurde ein fehlerhafter Wert eingegeben.");
-                    Spielwahl(spieler1, spieler2);
+                    überprüfung = false;
                 }
             }
+            if(ausgabe == null)
+            {
+                return Spielwahl(spieler1, spieler2);
+            }
+            return ausgabe;
         }
-        private static void ClearBoard(string[,] board, Spielfeld feld)
+        private static void ClearBoard( Spielfeld feld)
         {
             for (int i = 0; i < feld.Boardhoehe; i++)
             {
                 for (int x = 0; x < feld.Boardlaenge; x++)
                 {
-                    board[i, x] = null;
+                    _felderGewonnen[i, x] = null;
                 }
             }
         }

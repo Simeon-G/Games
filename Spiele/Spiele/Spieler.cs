@@ -18,13 +18,16 @@ namespace Spiele
         public string SpielerZeichen { get; set; }
         public bool KünstlicheIntelligenz { get; set; }
 
-        //Man könnte hier überlegen die Programmlogik aus dem Konstruktor in eine eigene Methode zu verlegen
-        public Spieler(string spielerName, SpielerNummer Zahl)
+        public Spieler(string spielerName, int spielerZahl)
         {
             SpielerName = spielerName;
-            bool rdy = Int32.TryParse(Zahl.ToString(), out int spielerZahl);
             SpielerZahl = spielerZahl;
-            if(spielerZahl == 1)
+            ZeichenFestlegen(SpielerZahl);
+            KI();
+        }
+        private void ZeichenFestlegen(int spielerZahl)
+        {
+            if (spielerZahl == 1)
             {
                 SpielerZeichen = "X";
             }
@@ -32,7 +35,10 @@ namespace Spiele
             {
                 SpielerZeichen = "O";
             }
-            if(spielerName == "KI")
+        }
+        private void KI()
+        {
+            if (SpielerName == "KI")
             {
                 KünstlicheIntelligenz = true;
             }

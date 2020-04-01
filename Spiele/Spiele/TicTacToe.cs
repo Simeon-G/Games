@@ -50,7 +50,7 @@ namespace Spiele
             _fehlermeldung = "";
             Make_Move(Get_Move());
 
-            if (_fehlermeldung != "")
+            if (_fehlermeldung == "")
             {
                 gewonnen = Spielfeld.Gewonnen(3, Board, Feld, _anzahlSpielzüge, _derzeitigerSpieler);
                 gleichstand = Spielfeld.Gleichstand(Feld, Board);

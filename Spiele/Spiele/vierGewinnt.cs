@@ -68,9 +68,9 @@ namespace Spiele
 
         public void Make_Move(int[] koordinate)
         {
+            bool ok = false;
             if (_fehlermeldung == "")
             {
-                bool ok = false;
                 for (int i = Feld.Boardhoehe - 1; i >= 0; i--)
                 {
                     if (Board[i, koordinate[0]] == " ")
